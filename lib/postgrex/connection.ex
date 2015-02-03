@@ -209,6 +209,10 @@ defmodule Postgrex.Connection do
     GenServer.call(pid, :parameters, opts[:timeout] || @timeout)
   end
 
+  def rebootstrap(pid, opts \\ []) do
+    GenServer.call(pid, {:rebootstrap, opts}, opts[:timeout] || @timeout)
+  end
+
   ### GEN_SERVER CALLBACKS ###
 
   @doc false
@@ -418,6 +422,11 @@ defmodule Postgrex.Connection do
         reply(%ArgumentError{}, s)
         {:ok, s}
     end
+  end
+
+  defp command({:rebootstrap, _opts}, s) do
+    s = %{s | bootstrap: true}
+    new_query(Postgrex.Types.bootstrap_query, [], s)
   end
 
   defp new_data(<<type :: int8, size :: int32, data :: binary>> = tail, %{state: state} = s) do

@@ -364,6 +364,10 @@ defmodule QueryTest do
     assert [[{1, "2"}]] = query("SELECT $1::composite1", [{1, "2"}])
     assert [[[{1, "2"}]]] = query("SELECT $1::composite1[]", [[{1, "2"}]])
     assert [[{1, nil, 3}]] = query("SELECT $1::composite2", [{1, nil, 3}])
+
+    # This query fails because the parameter OID is that of the pseudo type
+    # record instead of the actual type composite1
+    assert [[true]] = query("SELECT true WHERE (1, '2')::composite1 = $1", [{1, "2"}])
   end
 
   test "encode enum", context do
